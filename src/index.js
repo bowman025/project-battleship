@@ -52,14 +52,14 @@ function initializeBoards(player1, player2, num) {
     boardDiv.classList.add('board-init');
     playerInit.appendChild(boardDiv);
 
-    populateBoard(player1, boardDiv, 0);
+    populateBoard(player1, boardDiv);
 
     const randomizeBtn = document.createElement('button');
     randomizeBtn.textContent = 'Randomize';
     randomizeBtn.addEventListener('click', () => {
         player1.gameboard.placeShipsRandomly();
         boardDiv.replaceChildren();
-        populateBoard(player1, boardDiv, 0);
+        populateBoard(player1, boardDiv);
         displayShips(player1);
     });
 
@@ -68,7 +68,7 @@ function initializeBoards(player1, player2, num) {
     clearBtn.addEventListener('click', () => {
         player1.gameboard.resetBoard();
         boardDiv.replaceChildren();
-        populateBoard(player1, boardDiv, 0);
+        populateBoard(player1, boardDiv);
         displayShips(player1);
     });
 
@@ -117,7 +117,7 @@ function initializeBoards(player1, player2, num) {
     displayShips(player1);
 }
 
-function populateBoard(player, boardDiv, num) {
+function populateBoard(player, boardDiv) {
     for (let i = 0; i < 10; i++) {
         for (let j = 0; j < 10; j++) {
             const box = document.createElement('div');
@@ -125,7 +125,6 @@ function populateBoard(player, boardDiv, num) {
             box.classList.add('box');
             box.classList.add(`box${player.id}`);
             boardDiv.appendChild(box);
-            if (num === 0) box.classList.add('unclickable');
         }
     }
 }
@@ -140,7 +139,7 @@ function displayBoard(player) {
     const boardDiv = document.createElement('div');
     boardDiv.classList.add(`board${player.id}`);
     playerDiv.appendChild(boardDiv);
-    populateBoard(player, boardDiv, 1);
+    populateBoard(player, boardDiv);
     boardsDiv.append(playerDiv);
     displayShips(player);
 }

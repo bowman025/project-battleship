@@ -5,6 +5,11 @@ import { Ship } from "./ship.js";
 export class Gameboard {
     constructor() {
         this.board = Array.from({length: 10}, () => new Array(10).fill(0));
+        /* 0 = empty;
+           1 = ship;
+           2 = hit;
+          -1 = miss;
+         */
     }
     shipInventory = [];
     missedAttacks = [];
@@ -14,27 +19,41 @@ export class Gameboard {
         let empty = true;
         if (orientation === 'Horizontal') {
             for (let i = 0; i < ship.length; i++) {
-                if (y + i > 9 || this.board[x][y + i] !== 0) empty = false;
+                if (y + i > 9 || this.board[x][y + i] === 1) return empty = false;
+                if (i === 0) {
+                    if (y > 0 && this.board[x][y - 1] === 1 || x > 0 && this.board[x - 1][y] === 1 || x < 9 && this.board[x + 1][y] === 1 || x > 0 && y > 0 && this.board[x - 1][y - 1] === 1 || x < 9 && y > 0 && this.board[x + 1][y - 1] === 1 ) return empty = false;
+                } else if (i > 0 && i < ship.length - 1) {
+                    if (x > 0 && this.board[x - 1][y + i] === 1 || x < 9 && this.board[x + 1][y + i] === 1) return empty = false;
+                } else if (i === ship.length - 1) {
+                    if (y + i < 9 && this.board[x][y + i + 1] === 1 || x > 0 && this.board[x - 1][y + i] === 1 || x < 9 && this.board[x + 1][y + i] === 1 || x > 0 && y + i < 9 && this.board[x - 1][y + i + 1] === 1 || x < 9 && y + i < 9 && this.board[x + 1][y + i + 1] === 1) return empty = false;
+                }
             }
-            if (empty) {
+            if (empty === true) {
                 for (let i = 0; i < ship.length; i++) {
                     this.board[x][y + i] = 1;
                     ship.position.push([x, y + i]);
                 }
                 this.shipInventory.push(ship);
-                return true;
+                return empty;
             } else return false;
         } else if (orientation === 'Vertical') {
             for (let i = 0; i < ship.length; i++) {
-                if (x + i > 9 || this.board[x + i][y] !== 0) empty = false;
+                if (x + i > 9 || this.board[x + i][y] === 1) return empty = false;
+                if (i === 0) {
+                    if (x > 0 && this.board[x - 1][y] === 1 || y > 0 && this.board[x][y - 1] === 1 || y < 9 && this.board[x][y + 1] === 1 || x > 0 && y > 0 && this.board[x - 1][y - 1] === 1 || x > 0 && y < 9 && this.board[x - 1][y + 1] === 1) return empty = false;
+                } else if (i > 0 && i < ship.length - 1) {
+                    if (y > 0 && this.board[x + i][y - 1] === 1 || y < 9 && this.board[x + i][y + 1] === 1) return empty = false;
+                } else if (i === ship.length - 1) {
+                    if (x + i < 9 && this.board[x + i + 1][y] === 1 || y > 0 && this.board[x + i][y - 1] === 1 || y < 9 && this.board[x + i][y + 1] === 1 || x + i < 9 && y > 0 && this.board[x + i + 1][y - 1] === 1 || x + i < 9 && y < 9 && this.board[x + i + 1][y + 1] === 1) return empty = false;
+                }
             }
-            if (empty) {
+            if (empty === true) {
                 for (let i = 0; i < ship.length; i++) {
                     this.board[x + i][y] = 1;
                     ship.position.push([x + i, y]);
                 }
                 this.shipInventory.push(ship);
-                return true;
+                return empty;
             } else return false;
         } else return false;
     }
