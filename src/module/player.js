@@ -13,50 +13,53 @@ export class ComputerPlayer extends Player {
         super(name, id);
     }
     attack(opponent) {
-        const [x, y] = this.#choosePosition();
-            const missed = opponent.gameboard.missedAttacks.some(position => JSON.stringify(position) === JSON.stringify([x, y]));
-            const made = opponent.gameboard.madeAttacks.some(position => JSON.stringify(position) === JSON.stringify([x, y]));
-            if (missed === false && made === false) {
-                return [x, y, opponent.gameboard.receiveAttack(x, y)];
-            } else return this.attack(opponent);
-        /* if (this.hit === 0) {
-            const [x, y] = this.#choosePosition();
-            const missed = opponent.gameboard.missedAttacks.some(position => JSON.stringify(position) === JSON.stringify([x, y]));
-            const made = opponent.gameboard.madeAttacks.some(position => JSON.stringify(position) === JSON.stringify([x, y]));
+        let x, y;
+        this.hitCoordinates.length === 0 ? [x, y] = this.#choosePosition() : [x, y] = this.#chooseOrientation();
+        console.log(x, y);
+        const missed = opponent.gameboard.missedAttacks.some(position => JSON.stringify(position) === JSON.stringify([x, y]));
+        const made = opponent.gameboard.madeAttacks.some(position => JSON.stringify(position) === JSON.stringify([x, y]));
+        if (this.hitCoordinates.length === 0) {
             if (missed === false && made === false) {
                 let [a, b, result] = [x, y, opponent.gameboard.receiveAttack(x, y)];
-                if (result === 'hit') {
-                    this.hit = 1;
-                    this.coordinates.push([x, y]);
-                    return [a, b, result];
-                }
+                if (result === 'hit') this.hitCoordinates.push([x, y]);
+                return [a, b, result];
             } else return this.attack(opponent);
-        } else if (this.hit === 1) {
-            let [x, y] = this.#chooseOrientation(this.coordinates[0]);
-            const missed = opponent.gameboard.missedAttacks.some(position => JSON.stringify(position) === JSON.stringify([x, y]));
-            const made = opponent.gameboard.madeAttacks.some(position => JSON.stringify(position) === JSON.stringify([x, y]));
+        } else if (this.hitCoordinates.length > 0) {
             if (missed === false && made === false) {
-                let result = [x, y, opponent.gameboard.receiveAttack(x, y)];
-                if (result === 'hit') {
-                    this.hit = 2;
-                    this.coordinates.push([x, y]);
-                    return result;
-                }
+                let [c, d, result] = [x, y, opponent.gameboard.receiveAttack(x, y)];
+                if (result === 'hit') this.hitCoordinates.push([x, y]);
+                else if (result === 'sunk') this.hitCoordinates = [];
+                return [c, d, result];
             } else return this.attack(opponent);
-        } else if (this.hit === 2) {
-
-        } */
+        }
    }
     #choosePosition() {
         let x = Math.floor((Math.random() * 10));
         let y = Math.floor((Math.random() * 10));
         return [x, y];
     }
-    #chooseOrientation([x, y]) {
-        let positions = [[x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]];
-        let index = Math.floor(Math.random() + positions.length);
-        return positions[index];
+    #chooseOrientation() {
+        const coord = this.hitCoordinates.sort((a, b) => a[0] === b[0] ? a[1] - b[1] : a[0] - b[0]);
+        const [x, y] = coord[0];
+        const last = coord.length - 1;
+        let pos = [];
+        if (coord.length === 1) {
+            if (x > 0) pos.push([x - 1, y]);
+            if (x < 9) pos.push([x + 1, y]);
+            if (y > 0) pos.push([x, y - 1]);
+            if (y < 9) pos.push([x, y + 1]);
+        } else {
+            const [a, b] = coord[last];
+            if (x === a && y + last === b) {
+                if (y > 0) pos.push([x, y - 1]);
+                if (b < 9) pos.push([a, b + 1]);
+            } else if (x + last === a && y === b) {
+                if (x > 0) pos.push([x - 1, y]);
+                if (a < 9) pos.push([a + 1, b]);
+            }
+        }
+        let index = Math.floor(Math.random() * pos.length);
+        return pos[index];
     }
-    hit = 0;
-    coordinates = [];
+    hitCoordinates = [];
 }
