@@ -13,33 +13,23 @@ export class ComputerPlayer extends Player {
         super(name, id);
     }
     attack(opponent) {
-        let x, y;
-        this.hitCoordinates.length === 0 ? [x, y] = this.#choosePosition() : [x, y] = this.#chooseOrientation();
-        console.log(x, y);
+        const [x, y] = this.#choosePosition();
         const missed = opponent.gameboard.missedAttacks.some(position => JSON.stringify(position) === JSON.stringify([x, y]));
         const made = opponent.gameboard.madeAttacks.some(position => JSON.stringify(position) === JSON.stringify([x, y]));
-        if (this.hitCoordinates.length === 0) {
-            if (missed === false && made === false) {
-                let [a, b, result] = [x, y, opponent.gameboard.receiveAttack(x, y)];
-                if (result === 'hit') this.hitCoordinates.push([x, y]);
-                return [a, b, result];
-            } else return this.attack(opponent);
-        } else if (this.hitCoordinates.length > 0) {
-            if (missed === false && made === false) {
-                let [c, d, result] = [x, y, opponent.gameboard.receiveAttack(x, y)];
-                if (result === 'hit') this.hitCoordinates.push([x, y]);
-                else if (result === 'sunk') this.hitCoordinates = [];
-                return [c, d, result];
-            } else return this.attack(opponent);
-        }
-   }
-    #choosePosition() {
-        let x = Math.floor((Math.random() * 10));
-        let y = Math.floor((Math.random() * 10));
-        return [x, y];
+        if (missed === false && made === false) {
+            let [a, b, result] = [x, y, opponent.gameboard.receiveAttack(x, y)];
+            if (result === 'hit') this.#hitCoordinates.push([x, y]);
+            else if (result === 'sunk') this.#hitCoordinates = [];
+            return [a, b, result];
+        } else return this.attack(opponent);
     }
-    #chooseOrientation() {
-        const coord = this.hitCoordinates.sort((a, b) => a[0] === b[0] ? a[1] - b[1] : a[0] - b[0]);
+    #choosePosition() {
+        if (this.#hitCoordinates.length === 0) {
+            const x = Math.floor((Math.random() * 10));
+            const y = Math.floor((Math.random() * 10));
+            return [x, y];
+        } else {
+        const coord = this.#hitCoordinates.sort((a, b) => a[0] === b[0] ? a[1] - b[1] : a[0] - b[0]);
         const [x, y] = coord[0];
         const last = coord.length - 1;
         let pos = [];
@@ -60,6 +50,7 @@ export class ComputerPlayer extends Player {
         }
         let index = Math.floor(Math.random() * pos.length);
         return pos[index];
+        }
     }
-    hitCoordinates = [];
+    #hitCoordinates = [];
 }

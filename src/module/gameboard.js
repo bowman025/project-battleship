@@ -5,11 +5,7 @@ import { Ship } from "./ship.js";
 export class Gameboard {
     constructor() {
         this.board = Array.from({length: 10}, () => new Array(10).fill(0));
-        /* 0 = empty;
-           1 = ship;
-           2 = hit;
-          -1 = miss;
-         */
+        // 0 = empty, 1 = ship, 2 = hit, -1 = miss; 
     }
     shipInventory = [];
     missedAttacks = [];
