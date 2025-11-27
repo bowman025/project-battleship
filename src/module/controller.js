@@ -24,3 +24,7 @@ export function randomizeShips(player) {
 export function resetShips(player) {
     player.gameboard.resetBoard();
 }
+
+export function addShip(player, name, orientation, x, y) {
+    return player.gameboard.placeShip(name, orientation, x, y);
+}

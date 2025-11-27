@@ -1,5 +1,5 @@
 import './css/style.css';
-import { initializePlayers, attack, randomizeShips, resetShips } from './module/controller.js';
+import { initializePlayers, attack, randomizeShips, resetShips, addShip } from './module/controller.js';
 
 const main = document.querySelector('main');
 
@@ -61,16 +61,6 @@ function initializeBoards(player1, player2, num) {
     patrolBoat.classList.add('patrol-boat');
     dragShips.append(carrier, battleship, destroyer, submarine, patrolBoat);
 
-    const dragBtn = document.createElement('button');
-    dragBtn.textContent = 'Drag & Drop';
-    dragBtn.addEventListener('click', () => {
-        carrier.draggable = true;
-        battleship.draggable = true;
-        destroyer.draggable = true;
-        submarine.draggable = true;
-        patrolBoat.draggable = true;
-    });
-
     const horizontalBtn = document.createElement('button');
     horizontalBtn.textContent = 'Horizontal';
     const verticalBtn = document.createElement('button');
@@ -90,9 +80,9 @@ function initializeBoards(player1, player2, num) {
         displayShips(player1);
     });
 
-    const clearBtn = document.createElement('button');
-    clearBtn.textContent = 'Clear';
-    clearBtn.addEventListener('click', () => {
+    const resetBtn = document.createElement('button');
+    resetBtn.textContent = 'Reset';
+    resetBtn.addEventListener('click', () => {
         resetShips(player1);
         boardDiv.replaceChildren();
         populateBoardDiv(player1, boardDiv);
@@ -139,7 +129,35 @@ function initializeBoards(player1, player2, num) {
         }
     });
 
-    topContainer.append(randomizeBtn, clearBtn, readyBtn, dragBtn);
+    const dragBtn = document.createElement('button');
+    dragBtn.textContent = 'Drag & Drop';
+    dragBtn.addEventListener('click', () => {
+        carrier.draggable = true;
+        battleship.draggable = true;
+        destroyer.draggable = true;
+        submarine.draggable = true;
+        patrolBoat.draggable = true;
+        const boxes = document.querySelectorAll('.box');
+        boxes.forEach(box => {
+        console.log('boxes added');
+        box.addEventListener('dragover', (e) => e.preventDefault());
+        box.addEventListener('dragenter', (e) => {
+            box.style.border = '3px solid green';
+        });
+        box.addEventListener('dragleave', (e) => {
+            box.style.border = '1px dotted black';
+        });
+        box.addEventListener('drop', (e) => {
+            const coordinates = box.id.split(',');
+            console.log(coordinates);
+            let status = addShip(player1, 'Carrier', 'Horizontal', Number(coordinates[1]), Number(coordinates[2]));
+            console.log(status);
+            if (status === true) displayShips(player1);
+        });
+    });
+    });
+
+    topContainer.append(randomizeBtn, resetBtn, readyBtn, dragBtn);
     bottomContainer.append(playerInit, dragDrop)
     main.replaceChildren(topContainer, bottomContainer);
     displayShips(player1);

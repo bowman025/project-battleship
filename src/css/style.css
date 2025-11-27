@@ -137,36 +137,36 @@ main {
     display: flex;
     flex-direction: column;
     width: 100%;
-    height: 100%;;
+    height: 100%;
     border: 1px solid black;
 }
 
 .carrier {
     height: 10%;
-    width: 80%;
-    margin: 5px;
+    width: 79%;
+    margin: 4% 5%;
     background-color: black;
 }
 
 .battleship {
     height: 10%;
     width: 63%;
-    margin: 5px;
+    margin: 4% 5%;
     background-color: black;
 }
 
 .destroyer,
 .submarine {
     height: 10%;
-    width: 48%;
-    margin: 5px;
+    width: 47%;
+    margin: 4% 5%;
     background-color: black;
 }
 
 .patrol-boat {
     height: 10%;
     width: 31%;
-    margin: 5px;
+    margin: 4% 5%;
     background-color: black;
 }
 
