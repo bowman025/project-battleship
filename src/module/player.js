@@ -16,7 +16,7 @@ export class ComputerPlayer extends Player {
         const [x, y] = this.#choosePosition();
         const missed = opponent.gameboard.missedAttacks.some(position => JSON.stringify(position) === JSON.stringify([x, y]));
         const made = opponent.gameboard.madeAttacks.some(position => JSON.stringify(position) === JSON.stringify([x, y]));
-        if (missed === false && made === false) {
+        if (missed === false && made === false && this.#checkBuffer(opponent, x, y) === true) {
             let [a, b, result] = [x, y, opponent.gameboard.receiveAttack(x, y)];
             if (result === 'hit') this.#hitCoordinates.push([x, y]);
             else if (result === 'sunk') this.#hitCoordinates = [];
@@ -53,4 +53,7 @@ export class ComputerPlayer extends Player {
         }
     }
     #hitCoordinates = [];
+    #checkBuffer(opponent, x, y) {
+        return opponent.gameboard.board[x][y] === 2 ? false : true;
+    }
 }

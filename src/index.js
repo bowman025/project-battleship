@@ -1,7 +1,5 @@
 import './css/style.css';
-import { Ship } from './module//ship.js';
-import { Gameboard } from './module/gameboard.js';
-import { ComputerPlayer, Player } from './module/player.js';
+import { initializePlayers, attack, randomizeShips, resetShips } from './module/controller.js';
 
 const main = document.querySelector('main');
 
@@ -28,47 +26,76 @@ function initializeDialog() {
     });
 }
 
-function initializePlayers(type) {
-    const player1 = new Player('Player 1', 1);
-    if (type === 'Human') {
-        const player2 = new Player('Player 2', 2);
-        return [player1, player2];
-    } else if (type === 'Computer') {
-        const comp = new ComputerPlayer('Player 2', 2);
-        return [player1, comp];
-    } else return false;
-}
-
 function initializeBoards(player1, player2, num) {
-    player1.gameboard.placeShipsRandomly();
+    randomizeShips(player1);
 
+    const topContainer = document.createElement('div');
+    topContainer.classList.add('top-container');
+    const bottomContainer = document.createElement('div');
+    bottomContainer.classList.add('bottom-container');
     const playerInit = document.createElement('div');
     playerInit.classList.add('player-init');
     const h2 = document.createElement('h2');
     h2.textContent = `${player1.name}, ` + 'Place Your Ships';
     document.createElement('h2');
-    playerInit.appendChild(h2);
+    topContainer.appendChild(h2);
     const boardDiv = document.createElement('div');
     boardDiv.classList.add('board-init');
     playerInit.appendChild(boardDiv);
 
-    populateBoard(player1, boardDiv);
+    populateBoardDiv(player1, boardDiv);
+
+    const dragDrop = document.createElement('div');
+    dragDrop.classList.add('drag');
+    const dragShips = document.createElement('div');
+    dragShips.classList.add('drag-ships');
+    const carrier = document.createElement('div');
+    carrier.classList.add('carrier');
+    const battleship = document.createElement('div');
+    battleship.classList.add('battleship');
+    const destroyer = document.createElement('div');
+    destroyer.classList.add('destroyer');
+    const submarine = document.createElement('div');
+    submarine.classList.add('submarine');
+    const patrolBoat = document.createElement('div');
+    patrolBoat.classList.add('patrol-boat');
+    dragShips.append(carrier, battleship, destroyer, submarine, patrolBoat);
+
+    const dragBtn = document.createElement('button');
+    dragBtn.textContent = 'Drag & Drop';
+    dragBtn.addEventListener('click', () => {
+        carrier.draggable = true;
+        battleship.draggable = true;
+        destroyer.draggable = true;
+        submarine.draggable = true;
+        patrolBoat.draggable = true;
+    });
+
+    const horizontalBtn = document.createElement('button');
+    horizontalBtn.textContent = 'Horizontal';
+    const verticalBtn = document.createElement('button');
+    verticalBtn.textContent = 'Vertical';
+
+    const orientationDiv = document.createElement('div');
+    orientationDiv.append(horizontalBtn, verticalBtn);
+
+    dragDrop.append(orientationDiv, dragShips);
 
     const randomizeBtn = document.createElement('button');
     randomizeBtn.textContent = 'Randomize';
     randomizeBtn.addEventListener('click', () => {
-        player1.gameboard.placeShipsRandomly();
+        randomizeShips(player1);;
         boardDiv.replaceChildren();
-        populateBoard(player1, boardDiv);
+        populateBoardDiv(player1, boardDiv);
         displayShips(player1);
     });
 
     const clearBtn = document.createElement('button');
     clearBtn.textContent = 'Clear';
     clearBtn.addEventListener('click', () => {
-        player1.gameboard.resetBoard();
+        resetShips(player1);
         boardDiv.replaceChildren();
-        populateBoard(player1, boardDiv);
+        populateBoardDiv(player1, boardDiv);
         displayShips(player1);
     });
 
@@ -93,31 +120,32 @@ function initializeBoards(player1, player2, num) {
                 main.replaceChildren(boards);
                 if (num === 2) {
                     if (player1.id === 1) {
-                        displayBoard(player1);
-                        displayBoard(player2);
+                        displayBoardDiv(player1);
+                        displayBoardDiv(player2);
                         playRound(player1, player2);
                     }
                     else {
-                        displayBoard(player2);
-                        displayBoard(player1);
+                        displayBoardDiv(player2);
+                        displayBoardDiv(player1);
                         playRound(player2, player1);
                     }
                 } else if (num === 0) {
-                    player2.gameboard.placeShipsRandomly();
-                    displayBoard(player1);
-                    displayBoard(player2);
+                    randomizeShips(player2);;
+                    displayBoardDiv(player1);
+                    displayBoardDiv(player2);
                     playRoundComputer(player1, player2, 1);
                 }
             }
         }
     });
 
-    playerInit.append(randomizeBtn, clearBtn, readyBtn);
-    main.replaceChildren(playerInit);
+    topContainer.append(randomizeBtn, clearBtn, readyBtn, dragBtn);
+    bottomContainer.append(playerInit, dragDrop)
+    main.replaceChildren(topContainer, bottomContainer);
     displayShips(player1);
 }
 
-function populateBoard(player, boardDiv) {
+function populateBoardDiv(player, boardDiv) {
     for (let i = 0; i < 10; i++) {
         for (let j = 0; j < 10; j++) {
             const box = document.createElement('div');
@@ -129,7 +157,7 @@ function populateBoard(player, boardDiv) {
     }
 }
 
-function displayBoard(player) {
+function displayBoardDiv(player) {
     const boardsDiv = document.querySelector('.boards');
     const playerDiv = document.createElement('div');
     playerDiv.classList.add(`player${player.id}`);
@@ -139,7 +167,7 @@ function displayBoard(player) {
     const boardDiv = document.createElement('div');
     boardDiv.classList.add(`board${player.id}`);
     playerDiv.appendChild(boardDiv);
-    populateBoard(player, boardDiv);
+    populateBoardDiv(player, boardDiv);
     boardsDiv.append(playerDiv);
     displayShips(player);
 }
@@ -154,10 +182,6 @@ function displayShips(player) {
             box.classList.add(`ship${player.id}`);
         }
     }
-}
-
-function attack(player, coordinates) {
-    return player.gameboard.receiveAttack(coordinates[1], coordinates[2]);
 }
 
 function playRound(attacker, defender) {
@@ -182,7 +206,15 @@ function playRound(attacker, defender) {
                 const status = attack(defender, coordinates);
                 if (status === 'hit' || status === 'sunk') {
                     box.classList.add('hit');
-                    if (status === 'sunk') setTimeout(alert, 200, 'Ship sunk!');
+                    if (status === 'sunk') {
+                        const sunk = document.createElement('div');
+                        sunk.classList.add('sunk');
+                        sunk.textContent = `${defender.name}'s ship sunk!`;
+                        main.appendChild(sunk);
+                        setTimeout(() => {
+                            main.removeChild(sunk);
+                        }, 1000);
+                    }
                     if (defender.gameboard.checkSunk()) {
                         const gameOver = document.createElement('div');
                         gameOver.classList.add('.game-over');
@@ -197,7 +229,13 @@ function playRound(attacker, defender) {
                 } else if (status === 'miss') {
                     box.classList.add('miss');
                     defenderBoxes.forEach(box => box.replaceWith(box.cloneNode(true)));
-                    setTimeout(playRound, 600, defender, attacker);
+                    const handoff = document.createElement('button');
+                    handoff.textContent = `Hand Off to ${defender.name}`;
+                    main.appendChild(handoff);
+                    handoff.addEventListener('click', () => {
+                        main.removeChild(handoff);
+                        playRound(defender, attacker);
+                    });
                 } else return false;
             });
         });
@@ -235,7 +273,6 @@ function playRoundComputer(player, computer, num) {
             });
         })
     } else if (num === 2) {
-        console.log('hello, this is computer attacking')
         const [x, y, status] = computer.attack(player);
         console.log([x, y], status);
         if (status === 'hit'|| status === 'sunk') {

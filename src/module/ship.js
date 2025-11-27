@@ -22,6 +22,7 @@ export class Ship {
                 break;
         }
     }
+    orientation = '';
     position = [];
     hit() {
         this.hits++;
