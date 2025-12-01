@@ -50,22 +50,37 @@ function initializeBoards(player1, player2, num) {
     const dragShips = document.createElement('div');
     dragShips.classList.add('drag-ships');
     const carrier = document.createElement('div');
-    carrier.classList.add('carrier');
+    carrier.classList.add('drag-ship', 'carrier', 'horizontal');
     const battleship = document.createElement('div');
-    battleship.classList.add('battleship');
+    battleship.classList.add('drag-ship', 'battleship', 'horizontal');
     const destroyer = document.createElement('div');
-    destroyer.classList.add('destroyer');
+    destroyer.classList.add('drag-ship', 'destroyer', 'horizontal');
     const submarine = document.createElement('div');
-    submarine.classList.add('submarine');
+    submarine.classList.add('drag-ship', 'submarine', 'horizontal');
     const patrolBoat = document.createElement('div');
-    patrolBoat.classList.add('patrol-boat');
+    patrolBoat.classList.add('drag-ship', 'patrol-boat', 'horizontal');
     dragShips.append(carrier, battleship, destroyer, submarine, patrolBoat);
 
     const horizontalBtn = document.createElement('button');
     horizontalBtn.textContent = 'Horizontal';
+    horizontalBtn.addEventListener('click', () => {
+        const ships = document.querySelectorAll('.drag-ship');
+        ships.forEach(ship => {
+            ship.classList.add('horizontal');
+            dragShips.style.flexDirection = 'column';
+            if (ship.classList.contains('vertical')) ship.classList.remove('vertical');
+        });
+    });
     const verticalBtn = document.createElement('button');
     verticalBtn.textContent = 'Vertical';
-
+    verticalBtn.addEventListener('click', () => {
+        const ships = document.querySelectorAll('.drag-ship');
+        ships.forEach(ship => {
+            ship.classList.add('vertical');
+            dragShips.style.flexDirection = 'row';
+            if (ship.classList.contains('horizontal')) ship.classList.remove('horizontal');
+        });
+    });
     const orientationDiv = document.createElement('div');
     orientationDiv.append(horizontalBtn, verticalBtn);
 
@@ -87,6 +102,15 @@ function initializeBoards(player1, player2, num) {
         boardDiv.replaceChildren();
         populateBoardDiv(player1, boardDiv);
         displayShips(player1);
+        const allShips = [carrier, battleship, destroyer, submarine, patrolBoat];
+        allShips.forEach(ship => {
+            if (ship.classList.contains('vertical')) {
+                ship.classList.remove('vertical');
+                ship.classList.add('horizontal');
+            }
+        });
+        dragShips.style.flexDirection = 'column';
+        dragShips.replaceChildren(...allShips);
     });
 
     const readyBtn = document.createElement('button');
@@ -132,14 +156,37 @@ function initializeBoards(player1, player2, num) {
     const dragBtn = document.createElement('button');
     dragBtn.textContent = 'Drag & Drop';
     dragBtn.addEventListener('click', () => {
-        carrier.draggable = true;
-        battleship.draggable = true;
-        destroyer.draggable = true;
-        submarine.draggable = true;
-        patrolBoat.draggable = true;
+        resetShips(player1);
+        boardDiv.replaceChildren();
+        populateBoardDiv(player1, boardDiv);
+        displayShips(player1);
+        const allShips = [carrier, battleship, destroyer, submarine, patrolBoat];
+        allShips.forEach(ship => {
+            ship.draggable = true;
+            if (ship.classList.contains('vertical')) {
+                ship.classList.remove('vertical');
+                ship.classList.add('horizontal');
+            }
+        });
+        dragShips.style.flexDirection = 'column';
+        dragShips.replaceChildren(...allShips);
+        carrier.addEventListener('dragstart', (e) => {
+            e.dataTransfer.setData('type', 'carrier');
+        });
+        battleship.addEventListener('dragstart', (e) => {
+            e.dataTransfer.setData('type', 'battleship');
+        });
+        destroyer.addEventListener('dragstart', (e) => {
+            e.dataTransfer.setData('type', 'destroyer');
+        });
+        submarine.addEventListener('dragstart', (e) => {
+            e.dataTransfer.setData('type', 'submarine');
+        });
+        patrolBoat.addEventListener('dragstart', (e) => {
+            e.dataTransfer.setData('type', 'patrol-boat');
+        });
         const boxes = document.querySelectorAll('.box');
         boxes.forEach(box => {
-        console.log('boxes added');
         box.addEventListener('dragover', (e) => e.preventDefault());
         box.addEventListener('dragenter', (e) => {
             box.style.border = '3px solid green';
@@ -148,11 +195,18 @@ function initializeBoards(player1, player2, num) {
             box.style.border = '1px dotted black';
         });
         box.addEventListener('drop', (e) => {
-            const coordinates = box.id.split(',');
-            console.log(coordinates);
-            let status = addShip(player1, 'Carrier', 'Horizontal', Number(coordinates[1]), Number(coordinates[2]));
-            console.log(status);
-            if (status === true) displayShips(player1);
+            box.style.border = '1px dotted black';
+            const coord = box.id.split(',');
+            const type = e.dataTransfer.getData('type');
+            const ship = document.querySelector(`.${type}`);
+            let orientation;
+            if (ship.classList.contains('horizontal')) orientation = 'horizontal';
+            else if (ship.classList.contains('vertical')) orientation = 'vertical';
+            let status = addShip(player1, type, orientation, coord[1], coord[2]);
+            if (status === true) {
+                displayShips(player1);
+                ship.remove();
+            }
         });
     });
     });
@@ -216,7 +270,7 @@ function playRound(attacker, defender) {
     let defenderShips = document.querySelectorAll(`.ship${defender.id}`);
     let defenderBoxes = document.querySelectorAll(`.box${defender.id}`);
     msg.addEventListener('click', () => {
-        defenderShips.forEach(ship => ship.classList.add('invisible'));        
+        defenderShips.forEach(ship => ship.classList.add('invisible'));
         defenderBoxes.forEach(box => {
             box.classList.add('hover-enabled');
             box.addEventListener('click', () => {

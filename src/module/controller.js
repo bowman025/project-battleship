@@ -26,5 +26,7 @@ export function resetShips(player) {
 }
 
 export function addShip(player, name, orientation, x, y) {
-    return player.gameboard.placeShip(name, orientation, x, y);
+    const a = Number(x);
+    const b = Number(y);
+    return player.gameboard.placeShip(name, orientation, a, b);
 }

@@ -11,8 +11,8 @@ export class Gameboard {
     placeShip(name, orientation, x, y) {
         let ship = new Ship(name);
         let empty = true;
-        if (orientation === 'Horizontal') {
-            ship.orientation = 'Horizontal';
+        if (orientation === 'horizontal') {
+            ship.orientation = 'horizontal';
             for (let i = 0; i < ship.length; i++) {
                 if (y + i > 9 || this.board[x][y + i] !== 0) return empty = false;
                 if (i === 0) {
@@ -42,8 +42,8 @@ export class Gameboard {
                 this.shipInventory.push(ship);
                 return empty;
             } else return false;
-        } else if (orientation === 'Vertical') {
-            ship.orientation = 'Vertical';
+        } else if (orientation === 'vertical') {
+            ship.orientation = 'vertical';
             for (let i = 0; i < ship.length; i++) {
                 if (x + i > 9 || this.board[x + i][y] !== 0) return empty = false;
                 if (i === 0) {
@@ -77,8 +77,8 @@ export class Gameboard {
     }
     placeShipsRandomly() {
         this.resetBoard();
-        const ships = ['Carrier', 'Battleship', 'Destroyer', 'Submarine', 'Patrol Boat'];
-        const orientation = ['Horizontal', 'Vertical'];
+        const ships = ['carrier', 'battleship', 'destroyer', 'submarine', 'patrol-boat'];
+        const orientation = ['horizontal', 'vertical'];
         for (let i = 0; i < ships.length; i++) {
             let status = false;
             while (status === false) {
@@ -117,7 +117,7 @@ export class Gameboard {
         for (let i = 0; i < ship.length; i++) {
             let x = ship.position[i][0];
             let y = ship.position[i][1];
-            if (ship.orientation === 'Horizontal') {
+            if (ship.orientation === 'horizontal') {
                 if (i === 0) {
                     if (y > 0) this.board[x][y - 1] = 2;
                     if (x > 0) this.board[x - 1][y] = 2;
@@ -134,7 +134,7 @@ export class Gameboard {
                     if (x > 0 && y < 9) this.board[x - 1][y + 1] = 2;
                     if (x < 9 && y < 9) this.board[x + 1][y + 1] = 2;
                 }
-            } else if(ship.orientation === 'Vertical') {
+            } else if(ship.orientation === 'vertical') {
                 if (i === 0) {
                     if (x > 0) this.board[x - 1][y] = 2;
                     if (y > 0) this.board[x][y - 1] = 2;

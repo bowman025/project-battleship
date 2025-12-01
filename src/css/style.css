@@ -138,35 +138,64 @@ main {
     flex-direction: column;
     width: 100%;
     height: 100%;
+    padding: 8%;
     border: 1px solid black;
 }
 
-.carrier {
-    height: 10%;
-    width: 79%;
-    margin: 4% 5%;
+.carrier.horizontal {
+    height: 11%;
+    width: 95%;
+    margin-bottom: 8%;
     background-color: black;
 }
 
-.battleship {
-    height: 10%;
-    width: 63%;
-    margin: 4% 5%;
+.carrier.vertical {
+    height: 60%;
+    width: 18%;
+    margin-right: 4%;
     background-color: black;
 }
 
-.destroyer,
-.submarine {
-    height: 10%;
-    width: 47%;
-    margin: 4% 5%;
+.battleship.horizontal {
+    height: 11%;
+    width: 76%;
+    margin-bottom: 8%;
     background-color: black;
 }
 
-.patrol-boat {
-    height: 10%;
-    width: 31%;
-    margin: 4% 5%;
+.battleship.vertical {
+    height: 48%;
+    width: 18%;
+    margin-right: 4%;
+    background-color: black;
+}
+
+.destroyer.horizontal,
+.submarine.horizontal {
+    height: 11%;
+    width: 57%;
+    margin-bottom: 8%;
+    background-color: black;
+}
+
+.destroyer.vertical,
+.submarine.vertical {
+    height: 36%;
+    width: 18%;
+    margin-right: 4%;
+    background-color: black;
+}
+
+.patrol-boat.horizontal {
+    height: 11%;
+    width: 38%;
+    margin-bottom: 8%;
+    background-color: black;
+}
+
+.patrol-boat.vertical {
+    height: 24%;
+    width: 18%;
     background-color: black;
 }
 

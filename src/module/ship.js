@@ -3,19 +3,19 @@ export class Ship {
         this.name = name;
         this.hits = 0;
         switch (name) {
-            case 'Carrier':
+            case 'carrier':
                 this.length = 5;
                 break;
-            case 'Battleship':
+            case 'battleship':
                 this.length = 4;
                 break;
-            case 'Destroyer':
+            case 'destroyer':
                 this.length = 3;
                 break;
-            case 'Submarine':
+            case 'submarine':
                 this.length = 3;
                 break;
-            case 'Patrol Boat':
+            case 'patrol-boat':
                 this.length = 2;
                 break;
             default:
