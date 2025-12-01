@@ -1,5 +1,10 @@
 import './css/style.css';
+import humanImg from './img/human.svg';
+import humanImg2 from './img/human-2.svg';
+import robotImg from './img/robot.svg';
+import fightImg from './img/fight.svg';
 import { initializePlayers, attack, randomizeShips, resetShips, addShip } from './module/controller.js';
+import { ComputerPlayer } from './module/player.js';
 
 const main = document.querySelector('main');
 
@@ -7,13 +12,27 @@ function initializeDialog() {
     const dialogBox = document.createElement('div');
     dialogBox.classList.add('dialog');
     main.replaceChildren(dialogBox);
-    const dialogText = document.createElement('p');
-    dialogText.textContent = 'Choose Game Mode!';
+    const txt = document.createElement('p');
+    const btns = document.createElement('div');
+    btns.classList.add('dialog-buttons');
     const btn1 = document.createElement('button');
-    btn1.textContent = 'Human vs. Human';
+    const human1 = document.createElement('img');
+    human1.src = humanImg;
+    const versus = document.createElement('img');
+    versus.src = fightImg;
+    const human2 = document.createElement('img');
+    human2.src = humanImg2;
+    btn1.append(human1, versus, human2);
     const btn2 = document.createElement('button');
-    btn2.textContent = 'Human vs. Computer';
-    dialogBox.append(dialogText, btn1, btn2);
+    const human3 = document.createElement('img');
+    human3.src = humanImg;
+    const versus2 = document.createElement('img');
+    versus2.src = fightImg;
+    const robot = document.createElement('img');
+    robot.src = robotImg;
+    btn2.append(human3, versus2, robot);
+    btns.append(btn1, btn2);
+    dialogBox.append(txt, btns);
     btn1.addEventListener('click', () => {
         const [player1, player2] = initializePlayers('Human');
         main.removeChild(dialogBox);
@@ -29,6 +48,8 @@ function initializeDialog() {
 function initializeBoards(player1, player2, num) {
     randomizeShips(player1);
 
+    const mainContainer = document.createElement('div');
+    mainContainer.classList.add('main-container');
     const topContainer = document.createElement('div');
     topContainer.classList.add('top-container');
     const bottomContainer = document.createElement('div');
@@ -36,8 +57,12 @@ function initializeBoards(player1, player2, num) {
     const playerInit = document.createElement('div');
     playerInit.classList.add('player-init');
     const h2 = document.createElement('h2');
-    h2.textContent = `${player1.name}, ` + 'Place Your Ships';
-    document.createElement('h2');
+    const playerIcon = document.createElement('img');
+    if (num === 1) playerIcon.src = humanImg;
+    else if (num === 2) playerIcon.src = humanImg2;
+    playerIcon.classList.add('player-icon');
+    h2.textContent = 'Place Your Ships';
+    h2.prepend(playerIcon);
     topContainer.appendChild(h2);
     const boardDiv = document.createElement('div');
     boardDiv.classList.add('board-init');
@@ -93,6 +118,16 @@ function initializeBoards(player1, player2, num) {
         boardDiv.replaceChildren();
         populateBoardDiv(player1, boardDiv);
         displayShips(player1);
+        const allShips = [carrier, battleship, destroyer, submarine, patrolBoat];
+        allShips.forEach(ship => {
+            if (ship.classList.contains('vertical')) {
+                ship.classList.remove('vertical');
+                ship.classList.add('horizontal');
+            }
+        });
+        dragShips.style.flexDirection = 'column';
+        dragShips.replaceChildren(...allShips);
+        dragBtn.classList.remove('unclickable');
     });
 
     const resetBtn = document.createElement('button');
@@ -111,12 +146,13 @@ function initializeBoards(player1, player2, num) {
         });
         dragShips.style.flexDirection = 'column';
         dragShips.replaceChildren(...allShips);
+        dragBtn.classList.remove('unclickable');
     });
 
     const readyBtn = document.createElement('button');
     readyBtn.textContent = 'Ready';
     readyBtn.addEventListener('click', (e) => {
-        if (player1.gameboard.shipInventory.length === 0) {
+        if (player1.gameboard.shipInventory.length !== 5) {
             e.preventDefault();
             alert('Please place your ships!');
         } else {
@@ -154,8 +190,10 @@ function initializeBoards(player1, player2, num) {
     });
 
     const dragBtn = document.createElement('button');
+    dragBtn.classList.add('drag-btn');
     dragBtn.textContent = 'Drag & Drop';
     dragBtn.addEventListener('click', () => {
+        dragDrop.setAttribute('active', 'on');
         resetShips(player1);
         boardDiv.replaceChildren();
         populateBoardDiv(player1, boardDiv);
@@ -187,33 +225,35 @@ function initializeBoards(player1, player2, num) {
         });
         const boxes = document.querySelectorAll('.box');
         boxes.forEach(box => {
-        box.addEventListener('dragover', (e) => e.preventDefault());
-        box.addEventListener('dragenter', (e) => {
-            box.style.border = '3px solid green';
+            box.addEventListener('dragover', (e) => e.preventDefault());
+            box.addEventListener('dragenter', (e) => {
+                box.style.border = '3px solid green';
+            });
+            box.addEventListener('dragleave', (e) => {
+                box.style.border = '1px dotted black';
+            });
+            box.addEventListener('drop', (e) => {
+                box.style.border = '1px dotted black';
+                const coord = box.id.split(',');
+                const type = e.dataTransfer.getData('type');
+                const ship = document.querySelector(`.${type}`);
+                let orientation;
+                if (ship.classList.contains('horizontal')) orientation = 'horizontal';
+                else if (ship.classList.contains('vertical')) orientation = 'vertical';
+                let status = addShip(player1, type, orientation, coord[1], coord[2]);
+                if (status === true) {
+                    displayShips(player1);
+                    ship.remove();
+                }
+            });
         });
-        box.addEventListener('dragleave', (e) => {
-            box.style.border = '1px dotted black';
-        });
-        box.addEventListener('drop', (e) => {
-            box.style.border = '1px dotted black';
-            const coord = box.id.split(',');
-            const type = e.dataTransfer.getData('type');
-            const ship = document.querySelector(`.${type}`);
-            let orientation;
-            if (ship.classList.contains('horizontal')) orientation = 'horizontal';
-            else if (ship.classList.contains('vertical')) orientation = 'vertical';
-            let status = addShip(player1, type, orientation, coord[1], coord[2]);
-            if (status === true) {
-                displayShips(player1);
-                ship.remove();
-            }
-        });
-    });
+        dragBtn.classList.add('unclickable');
     });
 
     topContainer.append(randomizeBtn, resetBtn, readyBtn, dragBtn);
     bottomContainer.append(playerInit, dragDrop)
-    main.replaceChildren(topContainer, bottomContainer);
+    mainContainer.append(topContainer, bottomContainer);
+    main.replaceChildren(mainContainer);
     displayShips(player1);
 }
 
@@ -233,9 +273,14 @@ function displayBoardDiv(player) {
     const boardsDiv = document.querySelector('.boards');
     const playerDiv = document.createElement('div');
     playerDiv.classList.add(`player${player.id}`);
-    const playerName = document.createElement('h2');
-    playerName.textContent = `${player.name}`;
-    playerDiv.appendChild(playerName);
+    /* const playerName = document.createElement('h2');
+    playerName.textContent = `${player.name}`; */
+    const playerIcon = document.createElement('img');
+    playerIcon.classList.add('player-icon');
+    if (player.name === 'Player 1') playerIcon.src = humanImg;
+    else if (player instanceof ComputerPlayer) playerIcon.src = robotImg;
+    else playerIcon.src = humanImg2;
+    playerDiv.appendChild(playerIcon);
     const boardDiv = document.createElement('div');
     boardDiv.classList.add(`board${player.id}`);
     playerDiv.appendChild(boardDiv);
