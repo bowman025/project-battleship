@@ -66,7 +66,7 @@ header,
 footer {
     padding: 10px 0;
     background-color: var(--color-1);
-    color: white;
+    color: var(--color-5);
 }
 
 .title {
@@ -371,7 +371,7 @@ main.game-over {
 }
 
 .invisible {
-    background-color: white;
+    background-color: var(--color-5);
 }
 
 .sunk-msg {
