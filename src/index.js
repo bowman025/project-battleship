@@ -3,18 +3,18 @@ import humanImg from './img/human.svg';
 import humanImg2 from './img/human-2.svg';
 import robotImg from './img/robot.svg';
 import fightImg from './img/fight.svg';
+import horizontalImg from './img/pan-horizontal.svg';
+import verticalImg from './img/pan-vertical.svg';
 import { initializePlayers, attack, randomizeShips, resetShips, addShip } from './module/controller.js';
 import { ComputerPlayer } from './module/player.js';
 
 const main = document.querySelector('main');
 
 function initializeDialog() {
+    if (main.classList.contains('game-over')) main.classList.remove('game-over');
     const dialogBox = document.createElement('div');
     dialogBox.classList.add('dialog');
     main.replaceChildren(dialogBox);
-    const txt = document.createElement('p');
-    const btns = document.createElement('div');
-    btns.classList.add('dialog-buttons');
     const btn1 = document.createElement('button');
     const human1 = document.createElement('img');
     human1.src = humanImg;
@@ -31,8 +31,7 @@ function initializeDialog() {
     const robot = document.createElement('img');
     robot.src = robotImg;
     btn2.append(human3, versus2, robot);
-    btns.append(btn1, btn2);
-    dialogBox.append(txt, btns);
+    dialogBox.append(btn1, btn2);
     btn1.addEventListener('click', () => {
         const [player1, player2] = initializePlayers('Human');
         main.removeChild(dialogBox);
@@ -52,13 +51,13 @@ function initializeBoards(player1, player2, num) {
     mainContainer.classList.add('main-container');
     const topContainer = document.createElement('div');
     topContainer.classList.add('top-container');
+    const topBtns = document.createElement('div');
+    topBtns.classList.add('top-btns');
     const bottomContainer = document.createElement('div');
     bottomContainer.classList.add('bottom-container');
-    const playerInit = document.createElement('div');
-    playerInit.classList.add('player-init');
     const h2 = document.createElement('h2');
     const playerIcon = document.createElement('img');
-    if (num === 1) playerIcon.src = humanImg;
+    if (num === 1 || num === 0) playerIcon.src = humanImg;
     else if (num === 2) playerIcon.src = humanImg2;
     playerIcon.classList.add('player-icon');
     h2.textContent = 'Place Your Ships';
@@ -66,7 +65,6 @@ function initializeBoards(player1, player2, num) {
     topContainer.appendChild(h2);
     const boardDiv = document.createElement('div');
     boardDiv.classList.add('board-init');
-    playerInit.appendChild(boardDiv);
 
     populateBoardDiv(player1, boardDiv);
 
@@ -87,7 +85,9 @@ function initializeBoards(player1, player2, num) {
     dragShips.append(carrier, battleship, destroyer, submarine, patrolBoat);
 
     const horizontalBtn = document.createElement('button');
-    horizontalBtn.textContent = 'Horizontal';
+    const horizontalImage = document.createElement('img');
+    horizontalImage.src = horizontalImg;
+    horizontalBtn.appendChild(horizontalImage);
     horizontalBtn.addEventListener('click', () => {
         const ships = document.querySelectorAll('.drag-ship');
         ships.forEach(ship => {
@@ -97,7 +97,9 @@ function initializeBoards(player1, player2, num) {
         });
     });
     const verticalBtn = document.createElement('button');
-    verticalBtn.textContent = 'Vertical';
+    const verticalImage = document.createElement('img');
+    verticalImage.src = verticalImg;
+    verticalBtn.appendChild(verticalImage);
     verticalBtn.addEventListener('click', () => {
         const ships = document.querySelectorAll('.drag-ship');
         ships.forEach(ship => {
@@ -107,8 +109,8 @@ function initializeBoards(player1, player2, num) {
         });
     });
     const orientationDiv = document.createElement('div');
+    orientationDiv.classList.add('orientation-btns');
     orientationDiv.append(horizontalBtn, verticalBtn);
-
     dragDrop.append(orientationDiv, dragShips);
 
     const randomizeBtn = document.createElement('button');
@@ -149,46 +151,6 @@ function initializeBoards(player1, player2, num) {
         dragBtn.classList.remove('unclickable');
     });
 
-    const readyBtn = document.createElement('button');
-    readyBtn.textContent = 'Ready';
-    readyBtn.addEventListener('click', (e) => {
-        if (player1.gameboard.shipInventory.length !== 5) {
-            e.preventDefault();
-            alert('Please place your ships!');
-        } else {
-            if (num === 1) {
-                const changeover = document.createElement('div');
-                changeover.classList.add('changeover');
-                const msg = document.createElement('button');
-                msg.textContent = 'Player 2 Take Over!';
-                changeover.appendChild(msg);
-                main.replaceChildren(changeover);
-                msg.addEventListener('click', () => initializeBoards(player2, player1, 2));
-            } else {
-                const boards = document.createElement('div');
-                boards.classList.add('boards');
-                main.replaceChildren(boards);
-                if (num === 2) {
-                    if (player1.id === 1) {
-                        displayBoardDiv(player1);
-                        displayBoardDiv(player2);
-                        playRound(player1, player2);
-                    }
-                    else {
-                        displayBoardDiv(player2);
-                        displayBoardDiv(player1);
-                        playRound(player2, player1);
-                    }
-                } else if (num === 0) {
-                    randomizeShips(player2);;
-                    displayBoardDiv(player1);
-                    displayBoardDiv(player2);
-                    playRoundComputer(player1, player2, 1);
-                }
-            }
-        }
-    });
-
     const dragBtn = document.createElement('button');
     dragBtn.classList.add('drag-btn');
     dragBtn.textContent = 'Drag & Drop';
@@ -227,7 +189,7 @@ function initializeBoards(player1, player2, num) {
         boxes.forEach(box => {
             box.addEventListener('dragover', (e) => e.preventDefault());
             box.addEventListener('dragenter', (e) => {
-                box.style.border = '3px solid green';
+                box.style.border = '3px solid rgb(18, 30, 59)';
             });
             box.addEventListener('dragleave', (e) => {
                 box.style.border = '1px dotted black';
@@ -250,9 +212,54 @@ function initializeBoards(player1, player2, num) {
         dragBtn.classList.add('unclickable');
     });
 
-    topContainer.append(randomizeBtn, resetBtn, readyBtn, dragBtn);
-    bottomContainer.append(playerInit, dragDrop)
-    mainContainer.append(topContainer, bottomContainer);
+    const readyBtn = document.createElement('button');
+    readyBtn.classList.add('ready-btn');
+    readyBtn.textContent = 'Ready';
+    readyBtn.addEventListener('click', (e) => {
+        if (player1.gameboard.shipInventory.length !== 5) {
+            e.preventDefault();
+            alert('Please place your ships!');
+        } else {
+            if (num === 1) {
+                const changeover = document.createElement('div');
+                changeover.classList.add('changeover');
+                const msg = document.createElement('button');
+                const p2Img = document.createElement('img');
+                p2Img.src = humanImg2;
+                msg.textContent = 'Take Over!';
+                msg.prepend(p2Img);
+                changeover.appendChild(msg);
+                main.replaceChildren(changeover);
+                msg.addEventListener('click', () => initializeBoards(player2, player1, 2));
+            } else {
+                const boards = document.createElement('div');
+                boards.classList.add('boards');
+                main.replaceChildren(boards);
+                if (num === 2) {
+                    if (player1.id === 1) {
+                        displayBoardDiv(player1);
+                        displayBoardDiv(player2);
+                        playRound(player1, player2);
+                    }
+                    else {
+                        displayBoardDiv(player2);
+                        displayBoardDiv(player1);
+                        playRound(player2, player1);
+                    }
+                } else if (num === 0) {
+                    randomizeShips(player2);;
+                    displayBoardDiv(player1);
+                    displayBoardDiv(player2);
+                    playRoundComputer(player1, player2, 1);
+                }
+            }
+        }
+    });
+
+    topBtns.append(randomizeBtn, resetBtn, dragBtn);
+    topContainer.append(topBtns);
+    bottomContainer.append(boardDiv, dragDrop)
+    mainContainer.append(topContainer, bottomContainer, readyBtn);
     main.replaceChildren(mainContainer);
     displayShips(player1);
 }
@@ -273,8 +280,6 @@ function displayBoardDiv(player) {
     const boardsDiv = document.querySelector('.boards');
     const playerDiv = document.createElement('div');
     playerDiv.classList.add(`player${player.id}`);
-    /* const playerName = document.createElement('h2');
-    playerName.textContent = `${player.name}`; */
     const playerIcon = document.createElement('img');
     playerIcon.classList.add('player-icon');
     if (player.name === 'Player 1') playerIcon.src = humanImg;
@@ -305,7 +310,11 @@ function playRound(attacker, defender) {
     const changeover = document.createElement('div');
     changeover.classList.add('changeover');
     const msg = document.createElement('button');
-    msg.textContent = `${attacker.name} Take Over!`;
+    const msgImg = document.createElement('img');
+    if (attacker.id === 1) msgImg.src = humanImg;
+    else msgImg.src = humanImg2;
+    msg.textContent = 'Take Over!';
+    msg.prepend(msgImg);
     changeover.appendChild(msg);
     main.appendChild(changeover);
     let attackerShips = document.querySelectorAll(`.ship${attacker.id}`);
@@ -324,30 +333,51 @@ function playRound(attacker, defender) {
                 if (status === 'hit' || status === 'sunk') {
                     box.classList.add('hit');
                     if (status === 'sunk') {
-                        const sunk = document.createElement('div');
-                        sunk.classList.add('sunk');
-                        sunk.textContent = `${defender.name}'s ship sunk!`;
-                        main.appendChild(sunk);
+                        const sunkMsg = document.createElement('div');
+                        sunkMsg.classList.add('sunk-msg');
+                        const opponentImg = document.createElement('img');
+                        if (defender.id === 1) opponentImg.src = humanImg;
+                        else if (defender.id === 2 && defender instanceof ComputerPlayer) opponentImg.src = robotImg;
+                        else opponentImg.src = humanImg2;
+                        sunkMsg.textContent = '\'s ship sunk!';
+                        sunkMsg.prepend(opponentImg);
+                        main.appendChild(sunkMsg);
                         setTimeout(() => {
-                            main.removeChild(sunk);
-                        }, 1000);
+                            main.removeChild(sunkMsg);
+                        }, 1200);
                     }
-                    if (defender.gameboard.checkSunk()) {
-                        const gameOver = document.createElement('div');
-                        gameOver.classList.add('.game-over');
-                        gameOver.textContent = `Game Over! ${defender.name}'s Fleet Has Been Sunk!`;
+                    if (defender.gameboard.checkSunk()) setTimeout(() => {
+                        const ggDiv = document.createElement('div');
+                        ggDiv.classList.add('gg');
+                        const gameOverMsg = document.createElement('div');
+                        gameOverMsg.textContent = 'GAME OVER!';
+                        const gameOverText = document.createElement('div');
+                        gameOverText.textContent = '\'s Fleet Has Been Sunk!';
+                        const gameOverImg = document.createElement('img');
+                        if (defender.id === 1) gameOverImg.src = humanImg;
+                        else gameOverImg.src = humanImg2;
+                        gameOverText.prepend(gameOverImg);
+                        ggDiv.append(gameOverMsg, gameOverText);
                         const restart = document.createElement('button');
+                        restart.classList.add('new-game-btn');
                         restart.textContent = 'New Game';
                         restart.addEventListener('click', () => {
                             initializeDialog();
                         });
-                        main.replaceChildren(gameOver, restart);
-                    }
+                        main.replaceChildren(ggDiv, restart);
+                        main.classList.add('game-over');
+                    }, 2000);
                 } else if (status === 'miss') {
                     box.classList.add('miss');
                     defenderBoxes.forEach(box => box.replaceWith(box.cloneNode(true)));
                     const handoff = document.createElement('button');
-                    handoff.textContent = `Hand Off to ${defender.name}`;
+                    handoff.classList.add('handoff-btn');
+                    const handoffImg = document.createElement('img');
+                    if (defender.id === 1) handoffImg.src = humanImg;
+                    else handoffImg.src = humanImg2;
+                    const handoffText = document.createElement('div');
+                    handoffText.textContent = 'Hand Off to';
+                    handoff.append(handoffText, handoffImg);
                     main.appendChild(handoff);
                     handoff.addEventListener('click', () => {
                         main.removeChild(handoff);
@@ -372,16 +402,37 @@ function playRoundComputer(player, computer, num) {
                 const status = attack(computer, coordinates);
                 if (status === 'hit' || status === 'sunk') {
                     box.classList.add('hit');
+                    if (status === 'sunk') {
+                        const sunkMsg = document.createElement('div');
+                        sunkMsg.classList.add('sunk-msg');
+                        const opponentImg = document.createElement('img');
+                        opponentImg.src = robotImg;
+                        sunkMsg.textContent = '\'s ship sunk!';
+                        sunkMsg.prepend(opponentImg);
+                        main.appendChild(sunkMsg);
+                        setTimeout(() => {
+                            main.removeChild(sunkMsg);
+                        }, 1200);
+                    }
                     if (computer.gameboard.checkSunk()) {
-                        const gameOver = document.createElement('div');
-                        gameOver.classList.add('.game-over');
-                        gameOver.textContent = `Game Over! ${computer.name}'s Fleet Has Been Sunk!`;
-                        const restart = document.createElement('button');
-                        restart.textContent = 'New Game';
-                        restart.addEventListener('click', () => {
-                            initializeDialog();
-                        });
-                        main.replaceChildren(gameOver, restart);
+                        setTimeout(() => {
+                            const ggDiv = document.createElement('div');
+                            ggDiv.classList.add('gg');
+                            const gameOverMsg = document.createElement('div');
+                            gameOverMsg.textContent = 'GAME OVER!';
+                            const gameOverText = document.createElement('div');
+                            gameOverText.textContent = '\'s Fleet Has Been Sunk!';
+                            const gameOverImg = document.createElement('img');
+                            gameOverImg.src = robotImg;
+                            gameOverText.prepend(gameOverImg);
+                            ggDiv.append(gameOverMsg, gameOverText);
+                            const restart = document.createElement('button');
+                            restart.classList.add('new-game-btn');
+                            restart.textContent = 'New Game';
+                            restart.addEventListener('click', () => initializeDialog());
+                            main.replaceChildren(ggDiv, restart);
+                            main.classList.add('game-over');
+                        }, 2000);
                     }
                 } else if (status === 'miss') {
                     box.classList.add(status);
@@ -394,16 +445,37 @@ function playRoundComputer(player, computer, num) {
         console.log([x, y], status);
         if (status === 'hit'|| status === 'sunk') {
             document.querySelector(`[id="${player.id},${[x, y]}"]`).classList.add('hit');
+            if (status === 'sunk') {
+                const sunkMsg = document.createElement('div');
+                sunkMsg.classList.add('sunk-msg');
+                const opponentImg = document.createElement('img');
+                opponentImg.src = humanImg;
+                sunkMsg.textContent = '\'s ship sunk!';
+                sunkMsg.prepend(opponentImg);
+                main.appendChild(sunkMsg);
+                setTimeout(() => {
+                    main.removeChild(sunkMsg);
+                }, 1200);
+            }
             if (player.gameboard.checkSunk()) {
-                const gameOver = document.createElement('div');
-                gameOver.classList.add('.game-over');
-                gameOver.textContent = `Game Over! ${player.name}'s Fleet Has Been Sunk!`;
-                const restart = document.createElement('button');
-                restart.textContent = 'New Game';
-                restart.addEventListener('click', () => {
-                    initializeDialog();
-                });
-                main.replaceChildren(gameOver, restart);
+                setTimeout(() => {
+                    const ggDiv = document.createElement('div');
+                    ggDiv.classList.add('gg');
+                    const gameOverMsg = document.createElement('div');
+                    gameOverMsg.textContent = 'GAME OVER!';
+                    const gameOverText = document.createElement('div');
+                    gameOverText.textContent = '\'s Fleet Has Been Sunk!';
+                    const gameOverImg = document.createElement('img');
+                    gameOverImg.src = humanImg;
+                    gameOverText.prepend(gameOverImg);
+                    ggDiv.append(gameOverMsg, gameOverText);
+                    const restart = document.createElement('button');
+                    restart.classList.add('new-game-btn');
+                    restart.textContent = 'New Game';
+                    restart.addEventListener('click', () => initializeDialog());
+                    main.replaceChildren(ggDiv, restart);
+                    main.classList.add('game-over');
+                }, 2000); 
             } else setTimeout(playRoundComputer, 200, player, computer, 2);
         } else if (status === 'miss') {
             document.querySelector(`[id="${player.id},${[x, y]}"]`).classList.add(status);
