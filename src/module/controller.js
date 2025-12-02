@@ -1,6 +1,8 @@
-import { Ship } from './ship.js';
-import { Gameboard } from './gameboard.js';
+import humanImg from '../img/human.svg';
+import humanImg2 from '../img/human-2.svg';
+import robotImg from '../img/robot.svg';
 import { ComputerPlayer, Player } from './player.js';
+import { initializeDialog } from './display';
 
 export function initializePlayers(type) {
     const player1 = new Player('Player 1', 1);
@@ -30,6 +32,8 @@ export function addShip(player, name, orientation, x, y) {
     const b = Number(y);
     return player.gameboard.placeShip(name, orientation, a, b);
 }
+
+const main = document.querySelector('main');
 
 export function playRound(attacker, defender) {
     const changeover = document.createElement('div');
